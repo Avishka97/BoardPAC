@@ -1,1 +1,0 @@
-﻿window.location.href = document.querySelector("a.SingleLoginRedirectUri").href;
