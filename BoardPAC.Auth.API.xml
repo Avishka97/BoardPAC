@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BoardPAC.Auth.API</name>
+    </assembly>
+    <members>
+        <member name="T:Auth.API.Helpers.TwoFactor.CounterBasedOtpGenerator">
+            <summary>
+                Implements the OATH HOTP algorithm.
+            </summary>
+            <example>
+                <code>
+                    CounterBasedOtp otp = new CounterBasedOtp("01234567", 6);
+                    int counter = 5555;
+                    string expectedCode = otp.ComputeOtp(counter);
+                    bool validCode = userSuppliedCode == expectedCode;
+                </code>
+            </example>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.CounterBasedOtpGenerator.#ctor(Auth.API.Helpers.TwoFactor.Key,System.Int32,Auth.API.Helpers.TwoFactor.IHMACAlgorithm)">
+            <summary>
+                Initializes a new instance of the CounterBasedOtpGenerator class.
+                This is used when the client and server share a counter value.
+            </summary>
+            <param name="secretKey">The secret key.</param>
+            <param name="otpLength">The number of digits in the OTP to generate.</param>
+            <param name="hmacAlgorithm">The hashing algorithm to use.</param>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.CounterBasedOtpGenerator.#ctor(Auth.API.Helpers.TwoFactor.Key,System.Int32)">
+            <summary>
+                Initializes a new instance of the CounterBasedOtpGenerator class.
+                This is used when the client and server share a counter value.
+            </summary>
+            <param name="secretKey">The secret key.</param>
+            <param name="otpLength">The number of digits in the OTP to generate.</param>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.CounterBasedOtpGenerator.GenerateOtp(System.Int32)">
+            <summary>
+                Generates the OTP for the given <paramref name="counter"/> value.
+                The client and server compute this independently and come up
+                with the same result, provided they use the same shared key.
+            </summary>
+            <param name="counter">The counter value to use.</param>
+            <returns>The OTP for the given counter value.</returns>
+        </member>
+        <member name="T:Auth.API.Helpers.TwoFactor.IHMACAlgorithm">
+            <summary>
+                Represents a class which can compute a cryptographic HMAC digest.
+            </summary>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.IHMACAlgorithm.ComputeHash(System.Byte[],System.Byte[])">
+            <summary>
+                Computes a HMAC digest.
+            </summary>
+            <param name="key">The key to use.</param>
+            <param name="buffer">The text to hash.</param>
+            <returns>The HMAC digest.</returns>
+        </member>
+        <member name="T:Auth.API.Helpers.TwoFactor.Key">
+            <summary>
+                Represents a secret key used for the one-time password generation.
+            </summary>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.Key.#ctor">
+            <summary>
+                Initializes a new instance of the Key class and generates a random 20-byte key.
+            </summary>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.Key.#ctor(System.Int32)">
+            <summary>
+                Initializes a new instance of the Key class and generates a random key with the specified seed.
+            </summary>
+            <param name="keyLength">Length in bytes of the generated key.</param>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.Key.#ctor(System.Byte[])">
+            <summary>
+                Initializes a new instance of the Key class.
+            </summary>
+            <param name="keyData">The key to initialize.</param>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.Key.#ctor(System.String)">
+            <summary>
+                Initializes a new instance of the Key class.
+            </summary>
+            <param name="base32key">The key to initialize.</param>
+            <exception cref="T:System.ArgumentException">base32key is not a valid base32-encoded string.</exception>
+        </member>
+        <member name="P:Auth.API.Helpers.TwoFactor.Key.Binary">
+            <summary>
+                Gets the key represented as a byte array.
+            </summary>
+        </member>
+        <member name="P:Auth.API.Helpers.TwoFactor.Key.Base32">
+            <summary>
+                Gets the key represented as base32-encoded string.
+            </summary>
+        </member>
+        <member name="T:Auth.API.Helpers.TwoFactor.Base32">
+            <summary>
+                Contains methods to convert to and from base-32 according to RFC 3548.
+            </summary>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.Base32.ToBase32(System.Byte[])">
+            <summary>
+                Converts a byte array to a base-32 representation.
+            </summary>
+            <param name="data">The data to convert.</param>
+            <returns>A base-32 encoded string.</returns>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.Base32.ToBinary(System.String)">
+            <summary>
+                Converts a base-32 encoded string to a byte array.
+            </summary>
+            <param name="base32">A base-32 encoded string.</param>
+            <returns>The data represented by the base-32 string.</returns>
+            <exception cref="T:System.ArgumentException">The argument is not a valid base32-encoded string.</exception>
+        </member>
+        <member name="T:Auth.API.Helpers.TwoFactor.SHA256HMACAlgorithm">
+            <summary>
+                The SHA256 hashing algorithm.
+            </summary>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.SHA256HMACAlgorithm.ComputeHash(System.Byte[],System.Byte[])">
+            <summary>
+                Computes a HMAC digest using the SHA256 algorithm.
+            </summary>
+            <param name="key">The key to use.</param>
+            <param name="buffer">The data to hash.</param>
+            <returns>The HMAC digest.</returns>
+        </member>
+        <member name="T:Auth.API.Helpers.TwoFactor.TimeBasedOtpGenerator">
+            <summary>
+                Implements the OATH HOTP algorithm.
+            </summary>
+            <remarks>
+                OATH TOTP is a derevation of the HOTP algorithm,
+                where the counter is derived from the time since
+                the UNIX epoch.
+            </remarks>
+            <example>
+                <code>
+                    TimeBasedOtp otp = new TimeBasedOtp("01234567", 6);
+                    string expectedCode = otp.ComputeOtp(DateTime.UtcNow);
+                    bool validCode = userSuppliedCode == expectedCode;
+                </code>
+            </example>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.TimeBasedOtpGenerator.#ctor(Auth.API.Helpers.TwoFactor.Key,System.Int32,Auth.API.Helpers.TwoFactor.IHMACAlgorithm)">
+            <summary>
+                Initializes a new instance of the TimeBasedOtpGenerator class. This
+                is used when the client and server do not share a counter
+                value but the clocks between the two are synchronized within
+                reasonable margins of each other.
+            </summary>
+            <param name="secretKey">The secret key.</param>
+            <param name="otpLength">The number of digits in the OTP to generate.</param>
+            <param name="hmacAlgorithm">The HMAC algorithm to use.</param>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.TimeBasedOtpGenerator.#ctor(Auth.API.Helpers.TwoFactor.Key,System.Int32)">
+            <summary>
+                Initializes a new instance of the TimeBasedOtpGenerator class. This
+                is used when the client and server do not share a counter
+                value but the clocks between the two are synchronized within
+                reasonable margins of each other.
+            </summary>
+            <param name="secretKey">The secret key.</param>
+            <param name="otpLength">The number of digits in the OTP to generate.</param>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.TimeBasedOtpGenerator.GenerateOtp(System.DateTime)">
+            <summary>
+                Generates the OTP for the given <paramref name="time"/> parameter.
+                The client and server compute this independently and come up
+                with the same result, provided they use the same shared key.
+            </summary>
+            <param name="time">The date and time for which to generate an OTP.</param>
+            <returns>The OTP for the given secret key and DateTime.</returns>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.TimeBasedOtpGenerator.ValidateOtp(System.String,System.DateTime)">
+            <summary>
+            Validates a given OTP. A default validity period of 60 seconds is used.
+            </summary>
+            <param name="providedOtp">The OTP provided by the user attempting authentication.</param>
+            <param name="currentTime">The time at which the given OTP should be valid.</param>
+            <returns>True if the provided OTP is valid, otherwise false.</returns>
+        </member>
+        <member name="M:Auth.API.Helpers.TwoFactor.TimeBasedOtpGenerator.ValidateOtp(System.String,System.DateTime,System.TimeSpan)">
+            <summary>
+            Validates a given OTP using the provided validity period.
+            </summary>
+            <param name="providedOtp">The OTP provided by the user attempting authentication.</param>
+            <param name="currentTime">The time at which the given OTP should be valid.</param>
+            <param name="validityPeriod">The interval of time in which the provided OTP should be allowed. For example, a validity period of 60 seconds indicates the code generated at 6:41 PM should still be valid at 6:40 PM and 6:42 PM. This helps accomodate for inaccurately-set clocks.</param>
+            <returns>True if the provided OTP is valid, otherwise false.</returns>
+        </member>
+        <member name="T:Auth.API.IdentityServer.Extensions.ResourceOwnerPasswordValidator`1">
+            <summary>
+            IResourceOwnerPasswordValidator that integrates with ASP.NET Identity.
+            </summary>
+            <typeparam name="TUser">The type of the user.</typeparam>
+            <seealso cref="!:IdentityServer4.Validation.IResourceOwnerPasswordValidator" />
+        </member>
+        <member name="M:Auth.API.IdentityServer.Extensions.ResourceOwnerPasswordValidator`1.#ctor(Microsoft.AspNetCore.Identity.UserManager{`0},Microsoft.AspNetCore.Identity.SignInManager{`0},Duende.IdentityServer.Services.IEventService,Auth.Core.Interfaces.Services.ITenantService,Microsoft.Extensions.Logging.ILogger{Auth.API.IdentityServer.Extensions.ResourceOwnerPasswordValidator{`0}},Common.Core.Security.Cryptography.AbstractEncryptionFactory,Common.Core.Interfaces.Services.IHttpUrlHelperService,Auth.Core.Interfaces.Services.ISettingsService,Common.Core.Interfaces.Cache.ICacheProvider{System.Collections.Generic.List{Common.Core.Models.HostUrlModel}},Microsoft.AspNetCore.Http.IHttpContextAccessor,Auth.Core.Interfaces.Services.IAccountService,Auth.Core.Interfaces.Services.IAdminAuditLogService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Auth.API.IdentityServer.Extensions.ResourceOwnerPasswordValidator`1"/> class.
+            </summary>
+        </member>
+        <member name="M:Auth.API.IdentityServer.Extensions.ResourceOwnerPasswordValidator`1.ValidateAsync(Duende.IdentityServer.Validation.ResourceOwnerPasswordValidationContext)">
+            <summary>
+            Validates the resource owner password credential
+            </summary>
+            <param name="context">The context.</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
